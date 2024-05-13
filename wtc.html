@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wheel &amp; Tyre Fitment Calculator</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.8.3.js"></script>
+  <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .myprepend {
+      min-width: 120px;
+    }
+  </style>
+</head>
+<body>
+<div class="row">
+  <div class="col-lg-4 col-md-7 col-sm-12">
+    <h4>Wheel &amp; Tyre Calculator</h4>
+    <div class="input-group mb-3" id="wheelradius_ig">
+      <span class="input-group-text myprepend">Wheel Radius</span>
+      <input type="text" id="wheelradius" class="form-control input_update" value ="19" aria-label="Wheel Alloy size(diameter) in inches" 
+      aria-describedby="wheelradius" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Wheel Alloy size(diameter) in inches"  onchange="getVars()">
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('wheelradius',-1)">-</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('wheelradius',+1)">+</button>
+    </div>
+    <div class="input-group mb-3" id="wheelwidth_ig">
+      <span class="input-group-text  myprepend">Wheel Width</span>
+      <input type="text" id="wheelwidth" class="form-control input_update" value ="10.5" aria-label="Wheel Alloy width in inches" 
+      aria-describedby="wheelwidth" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Wheel Alloy width in inches" onchange="getVars()">
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('wheelwidth',-0.5)">-</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('wheelwidth',+0.5)">+</button>
+    </div>
+    <div class="input-group mb-3" id="wheelos_ig">
+      <span class="input-group-text myprepend">Wheel Offset</span>
+      <input type="text" id="wheelos" class="form-control input_update" value ="0" aria-label="How far the hub connector petrudes or retracts from centre of wheel (in mm)" 
+      aria-describedby="wheelos" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="How far the hub connector petrudes or retracts from centre of wheel (in mm)" onchange="getVars()">
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('wheelos',-1)">-</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('wheelos',+1)">+</button>
+    </div>
+    <div class="input-group mb-3" id="tyrewidth_ig">
+      <span class="input-group-text myprepend">Tyre Size</span>
+      <input type="text" id="tyrewidth" class="form-control input_update" value ="275" aria-label="Width of tyre at its maximum point" 
+      aria-describedby="tyrewidth" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Width of tyre at its maximum point" onchange="getVars()">
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('tyrewidth',-5)">-</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('tyrewidth',+5)">+</button>
+    </div>
+    <div class="input-group mb-3" id="tyreprofile_ig">
+      <span class="input-group-text myprepend">Tyre Profile</span>
+      <input type="text" id="tyreprofile" class="form-control input_update" value ="35" aria-label="Percentage of tyre wall compared to its maximum width" 
+      aria-describedby="tyreprofile" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Percentage of tyre wall compared to its maximum width" onchange="getVars()">
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('tyreprofile',-1)">-</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('tyreprofile',+1)">+</button>
+    </div>
+    <div class="input-group mb-3" id="zoomRatio_ig">
+      <span class="input-group-text myprepend">Zoom &percnt;</span>
+      <input type="text" id="zoomRatio" class="form-control input_update" value ="100" aria-label="Change display Zoom" 
+      aria-describedby="zoomRatio" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Change display Zoom" onchange="getVars()">
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('zoomRatio',-10)">-</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="updateValues('zoomRatio',+10)">+</button>
+    </div>
+    <button class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Save trye size for comparison" onclick="saveSetup()">Set Original</button>
+    <span style="float:right"><span class="error-message"></span></span>
+  </div>
+  <div class="col-lg-4 col-md-5 col-sm-12">
+    <canvas id="wheeltyre" width="300px" height ="600px" style="border:1px solid rgb(179, 179, 179);margin: 3px;"></canvas>
+    <br />
+    <span ><small class="--bs-secondary-bg"> Created by DFour</small></span>
+  </div>
+  <div class="col-lg-4 col-md-12 col-sm-12">
+    <table class="table">
+      <tr class="tb_head">
+        <th></th><th>Old</th><th>New</th>
+      </tr>
+      <tr class="tb_dia">
+        <td>Diameter</td><td>-</td><td>-</td>
+      </tr>
+      <tr class="tb_circ">
+        <td>Circumferance</td><td>-</td><td>-</td>
+      </tr>
+      <tr class="tb_30">
+        <td>Speedo @ 30</td><td>-</td><td>-</td>
+      </tr>
+      <tr class="tb_60">
+        <td>Speedo @ 60</td><td>-</td><td>-</td>
+      </tr>
+      <tr class="tb_70">
+        <td>Speedo @ 70</td><td>-</td><td>-</td>
+      </tr>
+      <tr class="tb_poke">
+        <td>Poke</td><td>-</td><td>-</td>
+      </tr>
+      <tr class="tb_height">
+        <td>Height</td><td>-</td><td>-</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  const canvas = document.getElementById("wheeltyre");
+  const ctx = canvas.getContext("2d");
+  ctx.translate(canvas.width * 0.5, canvas.height * 0.5); // set 0,0 at center
+  const inToMM = 25.4
+  const DegToRad = 0.0174533
+  const WidthToTreadW = 0.95
+  const AIR = 5
+  const SMALL_STROKE = 2
+
+  var zoom_ratio = 0.5
+  var radius_in = 19
+  var radius_mm = 19 * inToMM           // alloy size
+  var wheelw_in = 10
+  var wheelw_mm = wheelw_in * inToMM           // allow width
+  var wheelo_mm = 0                     // alloy offset
+  var twidth_mm = 275                   // tyre width at max width
+  var tprofile = 35
+  var ttredWidth_mm = twidth_mm * WidthToTreadW   // estimate
+  var theight_mm = twidth_mm *tprofile* 0.01  // tyre height
+  var floory = 0 // y pos of road
+
+  var old_Saved = false
+  var old_dia = 0  // diameter
+  var old_circ = 0 // circumferance
+  var old_speedo30 = 30
+  var old_speedo60 = 60
+  var old_speedo70 = 70
+  var old_rideHeight = 0
+  var old_wheelo = 0
+  var old_radius_mm = 0
+  var old_wheelw_in = 0
+  var old_wheelw_mm = 0
+  var old_ttredWidth_mm = 0
+  var old_theight_mm = 0
+
+  var new_dia = 0  // diameter
+  var new_circ = 0 // circumferance
+  var new_poke = 0 // extra distance out
+  var new_speedo30 = 30
+  var new_speedo60 = 60
+  var new_rideHeight = 0
+
+// Handle Form value changes
+function updateValues(inputid,value){
+  nv = Number($( "#"+inputid).val())
+  $( "#"+inputid).val(nv+value)
+  updateAll()
+}
+
+// Refresh values and canvas
+function updateAll(){
+  $( ".error-message" ).html("")
+  getVars()
+  drawAll()
+}
+
+// draw to canvas
+function drawAll(){
+  ctx.beginPath();
+  ctx.clearRect(-canvas.width,-canvas.height,canvas.width*2,canvas.height*2); // x,y,w,h and not x,y,dx,dy
+  drawWheel(ctx,wheelo_mm,radius_mm,wheelw_mm,ttredWidth_mm,theight_mm,"grey","blue")
+
+  if(old_Saved){
+    drawWheel(ctx,old_wheelo,old_radius_mm,old_wheelw_mm,old_ttredWidth_mm,old_theight_mm,"green","orange")
+  }
+  drawHub(ctx)
+  drawUI(ctx)
+  updateStats()
+}
+
+// save tyre config
+function saveSetup(){
+  old_dia = (2*twidth_mm*tprofile/100)+radius_mm
+  old_circ = old_dia * Math.PI
+  old_radius = radius_in
+  old_wheelo = old_wheelo
+  old_wheelw_in = wheelw_in
+  old_radius_mm = radius_mm
+  old_wheelw_mm = wheelw_mm
+  old_ttredWidth_mm = ttredWidth_mm
+  old_theight_mm = theight_mm
+  old_Saved = true
+  pop_table_old()
+  updateAll() // force redraw
+}
+
+// populate table with updated data
+function pop_table_new(){
+  $(".tb_dia td:nth-child(3)").html(new_dia.toFixed(2)+"mm")
+  $(".tb_circ td:nth-child(3)").html(new_circ.toFixed(2)+"mm")
+  $(".tb_30 td:nth-child(3)").html(new_speedo30.toFixed(2)+"mph")
+  $(".tb_60 td:nth-child(3)").html(new_speedo60.toFixed(2)+"mph")
+  $(".tb_70 td:nth-child(3)").html(new_speedo70.toFixed(2)+"mph")
+  $(".tb_poke td:nth-child(3)").html(new_poke.toFixed(2)+"mm")
+  $(".tb_height td:nth-child(3)").html(new_rideHeight.toFixed(2)+"mm")
+}
+
+// populate table with saved data
+function pop_table_old(){
+  $(".tb_head th:nth-child(1)").html(twidth_mm+"/"+tprofile+" ET "+wheelo_mm+" "+old_radius+"x"+wheelw_in)
+  $(".tb_dia td:nth-child(2)").html(old_dia.toFixed(2)+"mm")
+  $(".tb_circ td:nth-child(2)").html(old_circ.toFixed(2)+"mm")
+  $(".tb_30 td:nth-child(2)").html(old_speedo30+"mph")
+  $(".tb_60 td:nth-child(2)").html(old_speedo60+"mph")
+  $(".tb_70 td:nth-child(2)").html(old_speedo70+"mph")
+  $(".tb_poke td:nth-child(2)").html("0.00mm")
+  $(".tb_height td:nth-child(2)").html("0.00mm")
+}
+
+// create statistics from form inputs
+function updateStats(){
+  new_dia = (2*twidth_mm*tprofile/100)+radius_mm
+  new_circ = new_dia * Math.PI
+  perDiff = old_circ / new_circ
+  new_speedo30 = 30 * perDiff
+  new_speedo60 = 60 * perDiff
+  new_speedo70 = 70 * perDiff
+  new_poke = -(wheelo_mm - old_wheelo) + (- (old_wheelw_in - wheelw_in) * 0.5* inToMM)
+  new_rideHeight = new_circ - old_circ
+  pop_table_new()
+}
+
+// get form inputs
+function getVars(){
+  zoom_ratio = Number($( "#zoomRatio" ).val()*0.005)
+  radius_in = $( "#wheelradius" ).val()
+  radius_mm = radius_in * inToMM
+  wheelw_in = $( "#wheelwidth" ).val()
+  wheelw_mm =  wheelw_in * inToMM
+  wheelo_mm = $( "#wheelos" ).val() 
+  twidth_mm = $( "#tyrewidth" ).val() 
+  tprofile = $( "#tyreprofile" ).val()
+  theight_mm = (tprofile * twidth_mm * 0.01)
+  ttredWidth_mm = twidth_mm * WidthToTreadW
+}
+
+// draw legend on canvas
+function drawUI(ctx){
+  ctx.font = "10px Georgia";
+  ctx.fillStyle = "black";
+  ctx.fillRect(-(canvas.width * 0.5)+5, -(canvas.height * 0.5)+5, 5, 5);
+  ctx.fillText("Hub", -(canvas.width * 0.5)+10, -(canvas.height * 0.5)+10);
+  ctx.fillStyle = "gray";
+  ctx.fillRect(-(canvas.width * 0.5)+5, -(canvas.height * 0.5)+15, 5, 5);
+  ctx.fillText("Wheel", -(canvas.width * 0.5)+10, -(canvas.height * 0.5)+20);
+  ctx.fillStyle = "blue";
+  ctx.fillRect(-(canvas.width * 0.5)+5, -(canvas.height * 0.5)+25, 5, 5);
+  ctx.fillText("Tyre", -(canvas.width * 0.5)+10, -(canvas.height * 0.5)+30);
+}
+
+// draw wheel hub
+function drawHub(ctx){
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 30 * zoom_ratio
+  ctx.beginPath();
+  ctx.moveTo(15* zoom_ratio, -80* zoom_ratio);
+  ctx.lineTo(15* zoom_ratio, 80* zoom_ratio);
+  ctx.stroke();
+
+  ctx.strokeStyle = "#FF550033";
+  ctx.lineWidth = SMALL_STROKE
+  ctx.beginPath();
+  ctx.moveTo(1, -canvas.height);
+  ctx.lineTo(1, canvas.height);
+  ctx.stroke();
+}
+
+// draw the wheel
+function drawWheel(ctx, wheel_offset,wheel_radius,wheel_width,tyre_width,tyre_height,wheel_col,tyre_col){
+  halfr = wheel_radius * 0.5
+  l = wheel_offset - (wheel_width * 0.5)
+  r = l + wheel_width
+  t = halfr
+  b = -halfr
+
+  ctx.strokeStyle = wheel_col;
+  ctx.lineWidth = SMALL_STROKE
+
+  // Begin a Path
+  ctx.beginPath();
+  ctx.moveTo(l* zoom_ratio, t* zoom_ratio);
+  ctx.lineTo(r* zoom_ratio, t* zoom_ratio);
+  ctx.lineTo(r* zoom_ratio, b* zoom_ratio);
+  ctx.lineTo(l* zoom_ratio, b* zoom_ratio);
+  ctx.lineTo(l* zoom_ratio, t* zoom_ratio);
+  ctx.stroke();
+
+  targetLength = (tyre_width * 0.5) + -wheel_offset
+  angl = -999
+
+  for (let index = -90; index < 92; index++) {
+    endXPos = (Math.sin(index * DegToRad) * tyre_height) +l
+    if (Math.abs(endXPos) >= targetLength){
+      angl = index
+    }
+  }
+
+  console.log(angl)
+
+  if (angl >30 ){
+    $( ".error-message" ).html("Tyre excessively Small.")
+  }
+  if (angl < -20 ){
+    $( ".error-message" ).html("Tyre excessively Big.")
+  }
+
+
+  lefty = ((Math.cos(angl * DegToRad) * tyre_height))
+  leftx = ((Math.sin(angl * DegToRad) * tyre_height)) 
+
+
+  ctx.strokeStyle = tyre_col;
+  ctx.lineWidth = SMALL_STROKE
+  // bottom tyre
+  ctx.beginPath();
+  ctx.moveTo(l* zoom_ratio, t* zoom_ratio);
+  ctx.lineTo((leftx+l)* zoom_ratio, (lefty+t)* zoom_ratio);
+  midx = wheel_offset * zoom_ratio
+  midy = (lefty+t)* zoom_ratio+ AIR
+  ctx.quadraticCurveTo(midx, midy,(-leftx+r)* zoom_ratio, (lefty+t)* zoom_ratio);
+  ctx.lineTo(r* zoom_ratio, t* zoom_ratio);
+  // top tyre 
+  ctx.moveTo(l* zoom_ratio, b* zoom_ratio);
+  ctx.lineTo((leftx+l)* zoom_ratio, (-lefty+b)* zoom_ratio);
+  midx = wheel_offset * zoom_ratio
+  midy = (-lefty+b)* zoom_ratio- AIR
+  ctx.quadraticCurveTo(midx, midy,(-leftx+r)* zoom_ratio, (-lefty+b)* zoom_ratio);
+  ctx.lineTo(r* zoom_ratio, b* zoom_ratio);
+  ctx.stroke();
+
+  //draw road (don't like it)
+  //floory = (lefty+t)* zoom_ratio+AIR
+  //ctx.fillStyle = "#00000033";
+  //ctx.fillRect(-(canvas.width * 0.5), floory, 999, 999);
+
+}
+
+// register listener an dfirst start
+$(document).ready(function(){
+  $( ".input_update" ).on("change", updateAll);
+  updateAll()
+
+
+})
+
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+</script>
+</body>
+</html>
